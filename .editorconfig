@@ -1,0 +1,19 @@
+# Normalise some basic formatting settings across IDEs.
+# https://editorconfig.org
+
+root = true
+
+# Indent by tabs to:
+# - Gain accessibility by making the indentation width customisable per developer.
+# - Reduce the number of required keystrokes.
+# - Reduce the file sizes.
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = tab
+insert_final_newline = true
+
+# YAML does not support tabs for indentation.
+[*.{yaml,yml}]
+indent_size = 2
+indent_style = space

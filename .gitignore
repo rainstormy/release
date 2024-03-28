@@ -1,0 +1,21 @@
+# Exclude build artifacts, caches, personalised files, and sensitive information from version control.
+# https://git-scm.com/docs/gitignore
+# https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# Development tools and IDEs
+.idea/*
+!.idea/runConfigurations/
+!.idea/*.iml
+!.idea/externalDependencies.xml
+!.idea/jsonSchemas.xml
+!.idea/modules.xml
+!.idea/vcs.xml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# Operating system artifacts
+*~
+.DS_Store
+Thumbs.db
