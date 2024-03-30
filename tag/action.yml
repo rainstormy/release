@@ -1,0 +1,30 @@
+name: Release / Tag
+description: Creates and pushes a Git tag from the commit that triggered the workflow.
+author: Steffen Diswal
+
+inputs:
+  version:
+    description: The semantic version number of the new release on the form <major.minor.patch[-prerelease][+buildinfo]> without any `v` prefix.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Process input parameters # https://github.com/actions/runner/issues/1070
+      run: |
+        if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-\.]+)?(\+[0-9A-Za-z-\.]+)?$ ]]; then
+          echo "Input parameter 'version' must be a semantic version number on the form <major.minor.patch[-prerelease][+buildinfo]>."
+          exit 2
+        fi
+      env:
+        VERSION: ${{ inputs.version }}
+      shell: bash
+      #
+    - name: Create a release tag
+      run: |
+        REMOTE=$(git remote | head -n 1)
+        git tag --annotate --message "Release $VERSION" "v$VERSION"
+        git push $REMOTE "v$VERSION"
+      env:
+        VERSION: ${{ inputs.version }}
+      shell: bash
