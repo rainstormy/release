@@ -1,0 +1,39 @@
+name: Release / GitHub
+description: Creates a draft GitHub release from a release tag.
+author: Steffen Diswal
+
+inputs:
+  gh-auth-token:
+    description: An authentication token for the GitHub CLI with scopes for `repo` and `read:org` in order to create a release.
+    required: true
+  #
+  version:
+    description: The semantic version number of the new release on the form <major.minor.patch[-prerelease][+buildinfo]> without any `v` prefix.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Process input parameters # https://github.com/actions/runner/issues/1070
+      run: |
+        if [[ -z "$GH_AUTH_TOKEN" ]]; then
+          echo "Input parameter 'gh-auth-token' must be non-empty."
+          exit 2
+        fi
+        if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-\.]+)?(\+[0-9A-Za-z-\.]+)?$ ]]; then
+          echo "Input parameter 'version' must be a semantic version number on the form <major.minor.patch[-prerelease][+buildinfo]>."
+          exit 2
+        fi
+      env:
+        GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
+        VERSION: ${{ inputs.version }}
+      shell: bash
+      #
+    - name: Create a draft GitHub release
+      run: |
+        gh auth login --with-token <<< "$GH_AUTH_TOKEN"
+        gh release create --draft --verify-tag --title "$VERSION" --notes "This release was created automatically by GitHub Actions." "v$VERSION"
+      env:
+        GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
+        VERSION: ${{ inputs.version }}
+      shell: bash
