@@ -8,22 +8,24 @@ inputs:
     required: true
   #
   version:
-    description: The semantic version number of the new release on the form <major.minor.patch[-prerelease][+buildinfo]> without any `v` prefix.
+    description: A string that contains a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
     required: true
 
 runs:
   using: composite
   steps:
-    - name: Process input parameters # https://github.com/actions/runner/issues/1070
+    - name: Process input parameters
+      id: parameters
       run: |
+        EXTRACTED_VERSION=$(echo "$VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
         if [[ -z "$GH_AUTH_TOKEN" ]]; then
-          echo "Input parameter 'gh-auth-token' must be non-empty."
+          echo 'Input parameter `gh-auth-token` must be defined.'
+          exit 2
+        elif [[ -z "$EXTRACTED_VERSION" ]]; then
+          echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
           exit 2
         fi
-        if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-\.]+)?(\+[0-9A-Za-z-\.]+)?$ ]]; then
-          echo "Input parameter 'version' must be a semantic version number on the form <major.minor.patch[-prerelease][+buildinfo]>."
-          exit 2
-        fi
+        echo "version=$EXTRACTED_VERSION" >> "$GITHUB_OUTPUT"
       env:
         GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
         VERSION: ${{ inputs.version }}
@@ -32,8 +34,8 @@ runs:
     - name: Create a draft GitHub release
       run: |
         gh auth login --with-token <<< "$GH_AUTH_TOKEN"
-        gh release create --draft --verify-tag --title "$VERSION" --notes "This release was created automatically by GitHub Actions." "v$VERSION"
+        gh release create --draft --verify-tag --title "$VERSION" --notes 'This release was created automatically by GitHub Actions.' "v$VERSION"
       env:
         GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
-        VERSION: ${{ inputs.version }}
+        VERSION: ${{ steps.parameters.outputs.version }}
       shell: bash
