@@ -1,0 +1,108 @@
+name: Release / npm
+description: Publishes an npm package from the commit that triggered the workflow.
+author: Steffen Diswal
+
+inputs:
+  access-level:
+    description: The public visibility of the package; `public` or `restricted`.
+    required: true
+  #
+  npm-auth-token:
+    description: A granular access token for the npm registry with `read` and `write` permissions for the package or the scope in which the package resides.
+    required: true
+  #
+  packagejson-excluded-fields:
+    description: A multiline string of names of properties to exclude from the published package.json file.
+    required: false
+    default: |
+      packageManager
+      scripts
+  #
+  packagejson-path:
+    description: The location of the `package.json` file that declares the package to be published.
+    required: false
+    default: ./package.json
+  #
+  prerelease-tag:
+    description: The tag name to associate with a prerelease of the package in addition to the package version number.
+    required: false
+    default: next
+  #
+  release-tag:
+    description: The tag name to associate with a major, minor, or patch release of the package in addition to the package version number.
+    required: false
+    default: latest
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+runs:
+  using: composite
+  steps:
+    - name: Process input parameters
+      id: parameters
+      run: |
+        if [[ "$ACCESS_LEVEL" != 'public' && "$ACCESS_LEVEL" != 'restricted' ]]; then
+          echo 'Input parameter `access-level` must be `public` or `restricted`.'
+          exit 2
+        elif [[ -z "$NPM_AUTH_TOKEN" ]]; then
+          echo 'Input parameter `npm-auth-token` must be specified.'
+          exit 2
+        elif [[ ("$PACKAGEJSON_PATH" != 'package.json' && "$PACKAGEJSON_PATH" != *'/package.json') || ! -f "$PACKAGEJSON_PATH" ]]; then
+          echo 'Input parameter `packagejson-path` must be a path to a `package.json` file.'
+          exit 2
+        elif [[ -z "$PRERELEASE_TAG" ]]; then
+          echo 'Input parameter `prerelease-tag` must be specified.'
+          exit 2
+        elif [[ -z "$RELEASE_TAG" ]]; then
+          echo 'Input parameter `release-tag` must be specified.'
+          exit 2
+        fi
+
+        VERSION=$(jq -r '.version' "$PACKAGEJSON_PATH")
+        if [[ -z "$VERSION" ]]; then
+          echo "The file \`$PACKAGEJSON_PATH\` must declare the \`version\` property."
+          exit 2
+        elif [[ "$VERSION" == *'-'* || "$VERSION" == *'+'* ]]; then
+          echo "tag=$PRERELEASE_TAG" >> "$GITHUB_OUTPUT"
+        else
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+        fi
+
+        PACKAGE_MANAGER=$(jq -r '.packageManager' "$PACKAGEJSON_PATH")
+        if [[ "$PACKAGE_MANAGER" == 'pnpm@'* || -f 'pnpm-lock.yaml' ]]; then
+          echo 'package-manager=pnpm' >> "$GITHUB_OUTPUT"
+        elif [[ "$PACKAGE_MANAGER" == 'yarn@'* || -f 'yarn.lock' ]]; then
+          echo 'package-manager=yarn' >> "$GITHUB_OUTPUT"
+        else
+          echo 'package-manager=npm' >> "$GITHUB_OUTPUT"
+        fi
+      env:
+        ACCESS_LEVEL: ${{ inputs.access-level }}
+        NPM_AUTH_TOKEN: ${{ inputs.npm-auth-token }}
+        PACKAGEJSON_PATH: ${{ inputs.packagejson-path }}
+        PRERELEASE_TAG: ${{ inputs.prerelease-tag }}
+        RELEASE_TAG: ${{ inputs.release-tag }}
+      shell: bash
+      #
+    - name: Delete development-related fields in package.json
+      run: echo "$PACKAGEJSON_EXCLUDED_FIELDS" | xargs -I {} npm pkg delete '{}'
+      env:
+        PACKAGEJSON_EXCLUDED_FIELDS: ${{ inputs.packagejson-excluded-fields }}
+      shell: bash
+      #
+    - name: Publish the npm package to the registry
+      run: |
+        if [[ "$PACKAGE_MANAGER" = 'pnpm' ]]; then
+          pnpm publish --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
+        elif [[ "$PACKAGE_MANAGER" = 'yarn' ]]; then
+          yarn pack --out 'package.tgz'
+          npm publish 'package.tgz' --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
+        else
+          npm publish --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
+        fi
+      env:
+        ACCESS_LEVEL: ${{ inputs.access-level }}
+        NODE_AUTH_TOKEN: ${{ inputs.npm-auth-token }}
+        PACKAGE_MANAGER: ${{ steps.parameters.outputs.package-manager }}
+        TAG: ${{ steps.parameters.outputs.tag }}
+      shell: bash
