@@ -10,25 +10,18 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Process input parameters
-      id: parameters
-      run: |
-        EXTRACTED_VERSION=$(echo "$VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
-        if [[ -z "$EXTRACTED_VERSION" ]]; then
+    # language=sh
+    - run: |
+        VERSION=$(echo "$RAW_VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
+        REMOTE=$(git remote | head -n 1)
+
+        if [[ -z "$VERSION" ]]; then
           echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
           exit 2
         fi
-        echo "remote=$(git remote | head -n 1)" >> "$GITHUB_OUTPUT"
-        echo "version=$EXTRACTED_VERSION" >> "$GITHUB_OUTPUT"
-      env:
-        VERSION: ${{ inputs.version }}
-      shell: bash
-      #
-    - name: Create a release tag
-      run: |
+
         git tag --annotate --message "Release $VERSION" "v$VERSION"
         git push "$REMOTE" "v$VERSION"
       env:
-        REMOTE: ${{ steps.parameters.outputs.remote }}
-        VERSION: ${{ steps.parameters.outputs.version }}
+        RAW_VERSION: ${{ inputs.version }}
       shell: bash

@@ -11,50 +11,32 @@ inputs:
     description: A string that contains a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
     required: true
 
+# https://github.com/cli/cli/issues/5896#issuecomment-1780072370
 runs:
   using: composite
   steps:
-    - name: Process input parameters
-      id: parameters
-      run: |
-        EXTRACTED_VERSION=$(echo "$VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
+    # language=sh
+    - run: |
+        VERSION=$(echo "$RAW_VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
+        REMOTE=$(git remote | head -n 1)
+
         if [[ -z "$GH_AUTH_TOKEN" ]]; then
           echo 'Input parameter `gh-auth-token` must be defined.'
           exit 2
-        elif [[ -z "$EXTRACTED_VERSION" ]]; then
+        elif [[ -z "$VERSION" ]]; then
           echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
           exit 2
         fi
-        echo "remote=$(git remote | head -n 1)" >> "$GITHUB_OUTPUT"
-        echo "version=$EXTRACTED_VERSION" >> "$GITHUB_OUTPUT"
-      env:
-        GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
-        VERSION: ${{ inputs.version }}
-      shell: bash
-      #
-    - name: Create a release branch
-      run: git checkout -b "release/$VERSION"
-      env:
-        VERSION: ${{ steps.parameters.outputs.version }}
-      shell: bash
-      #
-    - name: Commit modified files
-      run: |
+
+        git checkout -b "release/$VERSION"
         git add .
         git commit --message "Prepare the release of $VERSION"
         git push --set-upstream "$REMOTE" "release/$VERSION"
-      env:
-        REMOTE: ${{ steps.parameters.outputs.remote }}
-        VERSION: ${{ steps.parameters.outputs.version }}
-      shell: bash
-      #
-    - name: Create a pull request from the release branch # https://github.com/cli/cli/issues/5896#issuecomment-1780072370
-      run: |
+
         git fetch "$REMOTE" ${{ github.event.repository.default_branch }}
         gh auth login --with-token <<< "$GH_AUTH_TOKEN"
         gh pr create --title "Release $VERSION" --body 'This pull request was created automatically by GitHub Actions.'
       env:
         GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
-        REMOTE: ${{ steps.parameters.outputs.remote }}
-        VERSION: ${{ steps.parameters.outputs.version }}
+        RAW_VERSION: ${{ inputs.version }}
       shell: bash

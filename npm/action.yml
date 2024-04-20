@@ -38,13 +38,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Process input parameters
-      id: parameters
-      run: |
+    # language=sh
+    - run: |
         if [[ "$ACCESS_LEVEL" != 'public' && "$ACCESS_LEVEL" != 'restricted' ]]; then
           echo 'Input parameter `access-level` must be `public` or `restricted`.'
           exit 2
-        elif [[ -z "$NPM_AUTH_TOKEN" ]]; then
+        elif [[ -z "$NODE_AUTH_TOKEN" ]]; then
           echo 'Input parameter `npm-auth-token` must be specified.'
           exit 2
         elif [[ ("$PACKAGEJSON_PATH" != 'package.json' && "$PACKAGEJSON_PATH" != *'/package.json') || ! -f "$PACKAGEJSON_PATH" ]]; then
@@ -58,43 +57,23 @@ runs:
           exit 2
         fi
 
+        PACKAGE_MANAGER=$(jq -r '.packageManager' "$PACKAGEJSON_PATH")
         VERSION=$(jq -r '.version' "$PACKAGEJSON_PATH")
+
         if [[ -z "$VERSION" ]]; then
           echo "The file \`$PACKAGEJSON_PATH\` must declare the \`version\` property."
           exit 2
         elif [[ "$VERSION" == *'-'* || "$VERSION" == *'+'* ]]; then
-          echo "tag=$PRERELEASE_TAG" >> "$GITHUB_OUTPUT"
+          TAG="$PRERELEASE_TAG"
         else
-          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          TAG="$RELEASE_TAG"
         fi
 
-        PACKAGE_MANAGER=$(jq -r '.packageManager' "$PACKAGEJSON_PATH")
+        echo "$PACKAGEJSON_EXCLUDED_FIELDS" | xargs -I {} npm pkg delete '{}'
+
         if [[ "$PACKAGE_MANAGER" == 'pnpm@'* || -f 'pnpm-lock.yaml' ]]; then
-          echo 'package-manager=pnpm' >> "$GITHUB_OUTPUT"
-        elif [[ "$PACKAGE_MANAGER" == 'yarn@'* || -f 'yarn.lock' ]]; then
-          echo 'package-manager=yarn' >> "$GITHUB_OUTPUT"
-        else
-          echo 'package-manager=npm' >> "$GITHUB_OUTPUT"
-        fi
-      env:
-        ACCESS_LEVEL: ${{ inputs.access-level }}
-        NPM_AUTH_TOKEN: ${{ inputs.npm-auth-token }}
-        PACKAGEJSON_PATH: ${{ inputs.packagejson-path }}
-        PRERELEASE_TAG: ${{ inputs.prerelease-tag }}
-        RELEASE_TAG: ${{ inputs.release-tag }}
-      shell: bash
-      #
-    - name: Delete development-related fields in package.json
-      run: echo "$PACKAGEJSON_EXCLUDED_FIELDS" | xargs -I {} npm pkg delete '{}'
-      env:
-        PACKAGEJSON_EXCLUDED_FIELDS: ${{ inputs.packagejson-excluded-fields }}
-      shell: bash
-      #
-    - name: Publish the npm package to the registry
-      run: |
-        if [[ "$PACKAGE_MANAGER" = 'pnpm' ]]; then
           pnpm publish --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
-        elif [[ "$PACKAGE_MANAGER" = 'yarn' ]]; then
+        elif [[ "$PACKAGE_MANAGER" == 'yarn@'* || -f 'yarn.lock' ]]; then
           yarn pack --out 'package.tgz'
           npm publish 'package.tgz' --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
         else
@@ -103,6 +82,8 @@ runs:
       env:
         ACCESS_LEVEL: ${{ inputs.access-level }}
         NODE_AUTH_TOKEN: ${{ inputs.npm-auth-token }}
-        PACKAGE_MANAGER: ${{ steps.parameters.outputs.package-manager }}
-        TAG: ${{ steps.parameters.outputs.tag }}
+        PACKAGEJSON_EXCLUDED_FIELDS: ${{ inputs.packagejson-excluded-fields }}
+        PACKAGEJSON_PATH: ${{ inputs.packagejson-path }}
+        PRERELEASE_TAG: ${{ inputs.prerelease-tag }}
+        RELEASE_TAG: ${{ inputs.release-tag }}
       shell: bash

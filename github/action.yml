@@ -14,28 +14,21 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Process input parameters
-      id: parameters
-      run: |
-        EXTRACTED_VERSION=$(echo "$VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
+    # language=sh
+    - run: |
+        VERSION=$(echo "$RAW_VERSION" | grep --only-matching --extended-regexp '[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?')
+
         if [[ -z "$GH_AUTH_TOKEN" ]]; then
           echo 'Input parameter `gh-auth-token` must be defined.'
           exit 2
-        elif [[ -z "$EXTRACTED_VERSION" ]]; then
+        elif [[ -z "$VERSION" ]]; then
           echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
           exit 2
         fi
-        echo "version=$EXTRACTED_VERSION" >> "$GITHUB_OUTPUT"
-      env:
-        GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
-        VERSION: ${{ inputs.version }}
-      shell: bash
-      #
-    - name: Create a draft GitHub release
-      run: |
+
         gh auth login --with-token <<< "$GH_AUTH_TOKEN"
         gh release create --draft --verify-tag --title "$VERSION" --notes 'This release was created automatically by GitHub Actions.' "v$VERSION"
       env:
         GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
-        VERSION: ${{ steps.parameters.outputs.version }}
+        RAW_VERSION: ${{ inputs.version }}
       shell: bash
