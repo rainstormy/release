@@ -4,7 +4,7 @@ author: Steffen Diswal
 
 inputs:
   gh-auth-token:
-    description: An authentication token for the GitHub CLI with scopes for `repo` and `read:org` in order to create a release.
+    description: An access token for GitHub with scopes for `repo` and `read:org` in order to create a GitHub release.
     required: true
   #
   version:
