@@ -72,7 +72,7 @@ runs:
         echo "$PACKAGEJSON_EXCLUDED_FIELDS" | xargs -I {} npm pkg delete '{}'
 
         if [[ "$PACKAGE_MANAGER" == 'pnpm@'* || -f 'pnpm-lock.yaml' ]]; then
-          pnpm publish --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
+          pnpm publish --provenance --access "$ACCESS_LEVEL" --tag "$TAG" --no-git-checks
         elif [[ "$PACKAGE_MANAGER" == 'yarn@'* || -f 'yarn.lock' ]]; then
           yarn pack --out 'package.tgz'
           npm publish 'package.tgz' --provenance --access "$ACCESS_LEVEL" --tag "$TAG"
