@@ -1,5 +1,5 @@
-name: Release / Tag
-description: Creates and pushes a full semantic version tag in Git from the commit that triggered the workflow.
+name: Release / Major tag
+description: Creates and pushes a major-only version tag in Git from the commit that triggered the workflow.
 author: Steffen Diswal
 
 inputs:
@@ -20,8 +20,10 @@ runs:
           exit 2
         fi
 
-        git tag --annotate --message "Release $VERSION" "v$VERSION"
-        git push "$REMOTE" "v$VERSION"
+        MAJOR_VERSION=$(echo "$VERSION" | cut -d '.' -f 1)
+
+        git tag --force --annotate --message "Release $VERSION" "v$MAJOR_VERSION"
+        git push "$REMOTE" "v$MAJOR_VERSION" --force-with-lease
       env:
         RAW_VERSION: ${{ inputs.version }}
       shell: bash

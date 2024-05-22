@@ -3,15 +3,21 @@
 This set of reusable GitHub Actions implements a versioned release workflow with
 the following actions:
 
-- `rainstormy-actions/release/pr` creates a release-triggering pull request.
-- `rainstormy-actions/release/tag` creates a release tag in Git.
-- `rainstormy-actions/release/github` creates a draft GitHub release.
-- `rainstormy-actions/release/npm` publishes a package to an npm registry.
+- [`rainstormy-actions/release/pr`](#rainstormy-actions-release-pr) creates a
+  release-triggering pull request in GitHub.
+- [`rainstormy-actions/release/tag`](#rainstormy-actions-release-tag) creates a
+  full semantic version tag in Git.
+- [`rainstormy-actions/release/major-tag`](#rainstormy-actions-release-major-tag)
+  creates a major-only version tag in Git.
+- [`rainstormy-actions/release/github`](#rainstormy-actions-release-github)
+  creates a draft GitHub release.
+- [`rainstormy-actions/release/npm`](#rainstormy-actions-release-npm) publishes
+  a package to an npm registry.
 
-## Create a release-triggering pull request
+## `rainstormy-actions/release/pr`
 Use `rainstormy-actions/release/pr` to create a release branch and a
-corresponding pull request that updates release artifacts, package definitions,
-changelogs etc. to the given semantic version number.
+corresponding pull request in GitHub that updates release artifacts, package
+definitions, changelogs etc. to the given semantic version number.
 
 When triggered manually through a `workflow_dispatch`, you can provide the
 version number through an input parameter. Alternatively, you can compute the
@@ -72,21 +78,29 @@ create a pull request.
 A string that contains a semantic version number on the
 form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
 
-## Create a release tag
-Use `rainstormy-actions/release/tag` to create a Git tag that points to a
-release commit, e.g. the merge commit of the pull request created
-by `rainstormy-actions/release/pr`.
+## `rainstormy-actions/release/tag`
+Use `rainstormy-actions/release/tag` to create a full semantic version tag in
+Git that points to a release commit, e.g. the merge commit of the pull request
+created by `rainstormy-actions/release/pr`.
 
-The naming convention for the release tag is `v<version>`.
+The naming convention for the tag
+is `v<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+
+It is complemented by `rainstormy-actions/release/major-tag`, which creates a
+corresponding major-only version tag in Git.
 
 > [!IMPORTANT]  
-> As the action creates and pushes a release tag, it requires a separate access
+> As the action creates and pushes a Git tag, it requires a separate access
 > token with permission to push tags to the Git repository, e.g. provided in
 > the `token` parameter
 > of [actions/checkout](https://github.com/actions/checkout).
 
+> [!IMPORTANT]  
+> This action fails if the full semantic version tag already exists in the Git
+> repository.
+
 ```yaml
-# .github/workflows/release-tag.yml
+# .github/workflows/release-tags.yml
 on:
   pull_request:
     branches:
@@ -107,8 +121,71 @@ jobs:
           # Use a separate access token to allow the push tag event in this workflow to trigger subsequent workflows, e.g. to create a GitHub release and to publish an npm package.
           # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
           token: ${{ secrets.GH_AUTH_TOKEN }}
-      - name: Create a release tag
+      - name: Create a full semantic version tag in Git
         uses: rainstormy-actions/release/tag@v1 # https://github.com/rainstormy-actions/release
+        with:
+          version: ${{ github.head_ref }}
+      # - name: Create a major-only version tag in Git
+      #   uses: rainstormy-actions/release/major-tag@v1 # https://github.com/rainstormy-actions/release
+      #   with:
+      #     version: ${{ github.head_ref }}
+```
+
+### Options
+#### `version`
+A string that contains a semantic version number on the
+form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+
+## `rainstormy-actions/release/major-tag`
+Use `rainstormy-actions/release/major-tag` to create a major-only version tag in
+Git that points to a release commit, e.g. the merge commit of the pull request
+created by `rainstormy-actions/release/pr`.
+
+The naming convention for the tag is `v<major>`.
+
+It is complemented by `rainstormy-actions/release/tag`, which creates a
+corresponding full semantic version tag in Git.
+
+> [!IMPORTANT]  
+> As the action creates and pushes a Git tag, it requires a separate access
+> token with permission to push tags to the Git repository, e.g. provided in
+> the `token` parameter
+> of [actions/checkout](https://github.com/actions/checkout).
+
+> [!CAUTION]  
+> This action overwrites an existing major-only version tag in the Git. While
+> the official Git documentation
+> [strongly discourages](https://git-scm.com/docs/git-tag#_on_re_tagging)
+> this approach, it is often observed in practice among reusable GitHub Actions.
+
+```yaml
+# .github/workflows/release-tags.yml
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  tag:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions: { }
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4 # https://github.com/actions/checkout
+        with:
+          # Use a separate access token to allow the push tag event in this workflow to trigger subsequent workflows, e.g. to create a GitHub release and to publish an npm package.
+          # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+          token: ${{ secrets.GH_AUTH_TOKEN }}
+      # - name: Create a full semantic version tag in Git
+      #   uses: rainstormy-actions/release/tag@v1 # https://github.com/rainstormy-actions/release
+      #   with:
+      #     version: ${{ github.head_ref }}
+      - name: Create a major-only version tag in Git
+        uses: rainstormy-actions/release/major-tag@v1 # https://github.com/rainstormy-actions/release
         with:
           version: ${{ github.head_ref }}
 ```
@@ -118,12 +195,13 @@ jobs:
 A string that contains a semantic version number on the
 form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
 
-## Create a draft GitHub release
+## `rainstormy-actions/release/github`
 Use `rainstormy-actions/release/github` to create a draft GitHub release that
-points to a release tag in Git, e.g. the one created
+points to a full semantic version tag in Git, e.g. the one created
 by `rainstormy-actions/release/tag`.
 
-The expected naming convention for the release tag is `v<version>`.
+The expected naming convention for the tag
+is `v<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
 
 > [!IMPORTANT]  
 > As the action creates a GitHub release from a Git tag, it requires the Git
@@ -162,10 +240,10 @@ create a GitHub release.
 A string that contains a semantic version number on the
 form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
 
-## Publish a package to npm
+## `rainstormy-actions/release/npm`
 Use `rainstormy-actions/release/npm` to publish a package to an npm registry
-from a particular point in the Git history, e.g. the release tag created
-by `rainstormy-actions/release/tag`.
+from a particular point in the Git history, e.g. the full semantic version tag
+created by `rainstormy-actions/release/tag`.
 
 It supports npm 10, pnpm 9, and Yarn 4 and detects the package manager
 automatically from the package lockfile in the Git repository or from

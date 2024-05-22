@@ -1,5 +1,5 @@
 name: Release / GitHub
-description: Creates a draft GitHub release from a release tag.
+description: Creates a draft GitHub release from a full semantic version tag.
 author: Steffen Diswal
 
 inputs:
