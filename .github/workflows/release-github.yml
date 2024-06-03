@@ -1,0 +1,46 @@
+# This workflow creates a draft GitHub release from a full semantic version tag in Git.
+#
+# It is triggered automatically by pushing a Git tag on the form `v<major>.<minor>.<patch>[-prerelease][+buildinfo]`,
+# as done by the `release-tags.yml` workflow.
+#
+# It can be triggered manually via the GitHub CLI:
+#
+#   gh workflow run release-github.yml --ref <tag-name>
+#   gh run watch
+#
+# It can be triggered manually via the GitHub web interface:
+#   https://github.com/rainstormy-actions/release/actions/workflows/release-github.yml
+
+name: Release / GitHub
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  #
+  workflow_dispatch:
+
+# Cancel all previous runs of this workflow that are still in progress on the same branch.
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: release-github-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  github-release:
+    name: GitHub release
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions:
+      contents: read # Allow the job to check out the repository.
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        #
+      - name: Create a draft GitHub release
+        uses: rainstormy-actions/release/github@main # This is a first-party action.
+        with:
+          gh-auth-token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+          version: ${{ github.ref_name }}

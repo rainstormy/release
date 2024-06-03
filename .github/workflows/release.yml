@@ -1,0 +1,63 @@
+# This workflow creates a release commit and a pull request towards the `main` branch.
+#
+# It can be triggered manually on any branch via the GitHub CLI:
+#
+#   gh workflow run release.yml --field version=<major>.<minor>.<patch>[-prerelease][+buildinfo] --ref <branch-name>
+#   gh run watch
+#
+# It can be triggered manually via the GitHub web interface:
+#   https://github.com/rainstormy-actions/release/actions/workflows/release.yml
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The semantic version number of the new release.
+        type: string
+        required: true
+
+run-name: ${{ inputs.version }}
+
+# Cancel all previous runs of this workflow that are still in progress on the same branch.
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  pull-request:
+    name: Pull request
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions: { }
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        with:
+          # Use a separate access token with permission to commit and push.
+          token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+        #
+        # TODO: Updraft does not yet support Markdown changelogs.
+        #
+        # - name: Update release artifacts
+        #   if: ${{ !contains(inputs.version, '-') && !contains(inputs.version, '+') }}
+        #   run: pnpm updraft --files CHANGELOG.md --release-version $VERSION
+        #   env:
+        #     VERSION: ${{ inputs.version }}
+        #
+      - name: Use Nimbus (Bot) in Git
+        uses: rainstormy-actions/rainstorm-release/bot-nimbus@9317ddb0235eac4f442e89565d0b5dec80135842
+        with:
+          bot-nimbus-ssh-public-key: ${{ secrets.BOT_NIMBUS_SSH_PUBLIC_KEY }}
+          __bot-nimbus-ssh-private-key__: ${{ secrets.BOT_NIMBUS_SSH___THE___PRIVATE___KEY }}
+          ssh-key-fingerprints-github: ${{ secrets.SSH_KEY_FINGERPRINTS_GITHUB }}
+        #
+      - name: Create a release-triggering pull request in GitHub
+        uses: rainstormy-actions/release/pr@main # This is a first-party action.
+        with:
+          gh-auth-token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+          version: ${{ inputs.version }}
