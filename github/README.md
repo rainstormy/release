@@ -1,0 +1,45 @@
+## `rainstormy-actions/release/github`
+
+Use the `rainstormy-actions/release/github` action to create a draft GitHub
+release that points to a full semantic version tag in Git, e.g. the one created
+by the [`rainstormy-actions/release/tag`](../tag/README.md) action.
+
+The expected naming convention for the tag
+is `v<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+
+> [!IMPORTANT]  
+> As the action creates a GitHub release from a Git tag, it requires the Git
+> repository to be checked out prior to running the action, e.g. using
+> the [`actions/checkout`](https://github.com/actions/checkout) action.
+
+```yaml
+# .github/workflows/release-github.yml
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  github-release:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions:
+      contents: read # Allow the job to check out the repository.
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4 # https://github.com/actions/checkout
+      - name: Create a draft GitHub release
+        uses: rainstormy-actions/release/github@v1 # https://github.com/rainstormy-actions/release
+        with:
+          gh-auth-token: ${{ secrets.GH_AUTH_TOKEN }}
+          version: ${{ github.ref_name }}
+```
+
+## Options
+### `gh-auth-token`
+An access token for GitHub with scopes for `repo` and `read:org` in order to
+create a GitHub release.
+
+### `version`
+A string that contains a semantic version number on the
+form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
