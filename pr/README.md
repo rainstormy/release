@@ -35,7 +35,7 @@ jobs:
     permissions: { }
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4 # https://github.com/actions/checkout
+        uses: actions/checkout@v4
         with:
           # Use a separate access token with permission to commit and push.
           token: ${{ secrets.GH_AUTH_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
       #     VERSION: ${{ inputs.version }}
       #
       - name: Create a release-triggering pull request in GitHub
-        uses: rainstormy-actions/release/pr@v1 # https://github.com/rainstormy-actions/release
+        uses: rainstormy-actions/release/pr@v1
         with:
           gh-auth-token: ${{ secrets.GH_AUTH_TOKEN }}
           version: ${{ inputs.version }}

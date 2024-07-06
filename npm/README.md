@@ -31,9 +31,9 @@ jobs:
       id-token: write # Allow npm to publish the package with provenance.
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4 # https://github.com/actions/checkout
+        uses: actions/checkout@v4
       - name: Install Node.js and npm
-        uses: actions/setup-node@v4 # https://github.com/actions/setup-node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
@@ -44,7 +44,7 @@ jobs:
       #   run: npm run build
       #
       - name: Publish a package to npm
-        uses: rainstormy-actions/release/npm@v1 # https://github.com/rainstormy-actions/release
+        uses: rainstormy-actions/release/npm@v1
         with:
           access-level: public
           npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}

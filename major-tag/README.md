@@ -39,17 +39,17 @@ jobs:
     permissions: { }
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4 # https://github.com/actions/checkout
+        uses: actions/checkout@v4
         with:
           # Use a separate access token to allow the push tag event in this workflow to trigger subsequent workflows, e.g. to create a GitHub release and to publish an npm package.
           # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
           token: ${{ secrets.GH_AUTH_TOKEN }}
       # - name: Create a full semantic version tag in Git
-      #   uses: rainstormy-actions/release/tag@v1 # https://github.com/rainstormy-actions/release
+      #   uses: rainstormy-actions/release/tag@v1
       #   with:
       #     version: ${{ github.head_ref }}
       - name: Create a major-only version tag in Git
-        uses: rainstormy-actions/release/major-tag@v1 # https://github.com/rainstormy-actions/release
+        uses: rainstormy-actions/release/major-tag@v1
         with:
           version: ${{ github.head_ref }}
 ```

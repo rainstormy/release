@@ -27,9 +27,9 @@ jobs:
       contents: read # Allow the job to check out the repository.
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4 # https://github.com/actions/checkout
+        uses: actions/checkout@v4
       - name: Create a draft GitHub release
-        uses: rainstormy-actions/release/github@v1 # https://github.com/rainstormy-actions/release
+        uses: rainstormy-actions/release/github@v1
         with:
           gh-auth-token: ${{ secrets.GH_AUTH_TOKEN }}
           version: ${{ github.ref_name }}
