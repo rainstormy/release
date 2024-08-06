@@ -1,0 +1,95 @@
+# This workflow implements the continuous integration (CI) pipeline.
+# It validates the software quality.
+#
+# It is triggered automatically by pull requests opened towards the `main` branch.
+#
+# It can be triggered manually on any branch via the GitHub CLI:
+#
+#   gh workflow run ci.yml [--ref <branch-name>]
+#   gh run watch
+#
+# It can be triggered manually on any branch via the GitHub web interface:
+#   https://github.com/rainstormy-actions/release/actions/workflows/ci.yml
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_call:
+  workflow_dispatch:
+
+# Cancel all previous runs of this workflow that are still in progress on the same branch.
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  # For `workflow_call` events, `github.workflow` is the caller workflow instead of this workflow.
+  # The `ci-` prefix makes GitHub Actions distinguish this job from other jobs in the caller workflow.
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  has-clean-code:
+    name: Has clean code
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    permissions:
+      contents: read # Allow the job to check out the repository.
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        #
+      - name: Verify that the action shell scripts are clean
+        # language=sh
+        run: |
+          for ACTION in github major-tag npm pr tag; do
+            echo "Checking $ACTION/action.yml"
+            yq '.runs.steps.0.run' "$ACTION/action.yml" | shellcheck --shell bash --severity warning -
+          done
+
+  has-standardised-commit-messages:
+    name: Has standardised commit messages
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    permissions:
+      pull-requests: read # Allow the job to read the commit messages in the pull request.
+    steps:
+      - name: Verify that the commit messages are standardised
+        uses: rainstormy/github-action-validate-commit-messages@1f192721c973a7d33b1b1aeb9235431f904c1dcc # v1.1.5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          rules: |
+            acknowledged-author-email-addresses,
+            acknowledged-author-names,
+            acknowledged-committer-email-addresses,
+            acknowledged-committer-names,
+            capitalised-subject-lines,
+            empty-line-after-subject-lines,
+            imperative-subject-lines,
+            limit-length-of-body-lines,
+            limit-length-of-subject-lines,
+            multi-word-subject-lines,
+            no-co-authors,
+            no-merge-commits,
+            no-revert-revert-commits,
+            no-squash-commits,
+            no-trailing-punctuation-in-subject-lines,
+            no-unexpected-whitespace,
+            unique-subject-lines,
+
+          # The author and committer email address must be on one of these forms:
+          # - `id+username@users.noreply.github.com`
+          # - `noreply@github.com` (committer only, for automated version upgrades and for reverting pull requests directly from the GitHub web interface)
+          acknowledged-author-email-addresses--patterns: '\d+\+.+@users\.noreply\.github\.com'
+          acknowledged-committer-email-addresses--patterns: '\d+\+.+@users\.noreply\.github\.com noreply@github\.com'
+
+          # The author and committer name must be on one of these forms:
+          # - at least two words where the first word starts with a capital letter
+          # - `renovate[bot]` (for automated version upgrades)
+          # - `GitHub` (committer only, for automated version upgrades and for reverting pull requests directly from the GitHub web interface)
+          acknowledged-author-names--patterns: '\p{Lu}.*\s.+ renovate\[bot\]'
+          acknowledged-committer-names--patterns: '\p{Lu}.*\s.+ renovate\[bot\] GitHub'
