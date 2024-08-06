@@ -5,7 +5,7 @@
 #
 # It can be triggered manually on any branch via the GitHub CLI:
 #
-#   gh workflow run release-tags.yml --field version=<major>.<minor>.<patch>[-prerelease][+buildinfo] --ref <branch-name>
+#   gh workflow run release-tags.yml --field version=<major.minor.patch[-prerelease][+buildinfo]> --ref <branch-name>
 #   gh run watch
 #
 # It can be triggered manually via the GitHub web interface:
@@ -38,6 +38,7 @@ concurrency:
 jobs:
   quality-assurance:
     name: Quality assurance
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     permissions:
       contents: read # Allow the job to call the reusable `ci.yml` workflow.
       pull-requests: read # `ci.yml` requires `pull-requests` read permissions.
@@ -45,6 +46,7 @@ jobs:
 
   tags:
     name: Tags
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     needs: quality-assurance
     runs-on: ubuntu-24.04
     timeout-minutes: 1
