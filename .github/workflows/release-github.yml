@@ -29,9 +29,17 @@ concurrency:
 # All third-party actions are pinned to a specific commit SHA for security reasons.
 # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
 jobs:
+  quality-assurance:
+    name: Quality assurance
+    permissions:
+      contents: read # Allow the job to call the reusable `ci.yml` workflow.
+      pull-requests: read # `ci.yml` requires `pull-requests` read permissions.
+    uses: ./.github/workflows/ci.yml
+
   github-release:
     name: GitHub release
-    runs-on: ubuntu-22.04
+    needs: quality-assurance
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions:
       contents: read # Allow the job to check out the repository.

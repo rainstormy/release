@@ -33,10 +33,11 @@ runs:
         git commit --message "Prepare the release of $VERSION"
         git push --set-upstream "$REMOTE" "release/$VERSION"
 
-        git fetch "$REMOTE" ${{ github.event.repository.default_branch }}
+        git fetch "$REMOTE" "$DEFAULT_BRANCH"
         gh auth login --with-token <<< "$GH_AUTH_TOKEN"
         gh pr create --title "Release $VERSION" --body 'This pull request was created automatically by GitHub Actions.'
       env:
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
         RAW_VERSION: ${{ inputs.version }}
       shell: bash
