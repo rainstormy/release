@@ -24,7 +24,7 @@ on:
 
 jobs:
   npm-package:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions:
       contents: read # Allow the job to check out the repository.

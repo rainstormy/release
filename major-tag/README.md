@@ -32,9 +32,9 @@ on:
       - closed
 
 jobs:
-  tag:
+  tags:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions: { }
     steps:
@@ -57,4 +57,4 @@ jobs:
 ## Options
 ### `version`
 A string that contains a semantic version number on the
-form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+form `<major.minor.patch[-prerelease][+buildinfo]>`.

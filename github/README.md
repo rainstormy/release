@@ -5,7 +5,7 @@ release that points to a full semantic version tag in Git, e.g. the one created
 by the [`rainstormy-actions/release/tag`](../tag/README.md) action.
 
 The expected naming convention for the tag
-is `v<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+is `v<major.minor.patch[-prerelease][+buildinfo]>`.
 
 > [!IMPORTANT]  
 > As the action creates a GitHub release from a Git tag, it requires the Git
@@ -21,7 +21,7 @@ on:
 
 jobs:
   github-release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions:
       contents: read # Allow the job to check out the repository.
@@ -42,4 +42,4 @@ create a GitHub release.
 
 ### `version`
 A string that contains a semantic version number on the
-form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+form `<major.minor.patch[-prerelease][+buildinfo]>`.
