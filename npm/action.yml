@@ -1,35 +1,47 @@
 name: Release / npm
-description: Publishes an npm package from the commit that triggered the workflow.
+description: >
+  Publishes an npm package from the commit that triggered the workflow.
 author: Steffen Diswal
 
 inputs:
   access-level:
-    description: The public visibility of the package; `public` or `restricted`.
+    description: >
+      The public visibility of the package; `public` or `restricted`.
     required: true
   #
   npm-auth-token:
-    description: A granular access token for the npm registry with `read` and `write` permissions for the package or the scope in which the package resides.
+    description: >
+      A granular access token for the npm registry with `read` and `write`
+      permissions for the package or the scope in which the package resides.
     required: true
   #
   packagejson-excluded-fields:
-    description: A multiline string of names of properties to exclude from the published package.json file.
+    description: >
+      A multiline string of names of properties to exclude from the published
+      package.json file.
     required: false
     default: |
       packageManager
       scripts
   #
   packagejson-path:
-    description: The location of the `package.json` file that declares the package to be published.
+    description: >
+      The location of the `package.json` file that declares the package to be
+      published.
     required: false
     default: ./package.json
   #
   prerelease-tag:
-    description: The tag name to associate with a prerelease of the package in addition to the package version number.
+    description: >
+      The tag name to associate with a prerelease of the package in addition to
+      the package version number.
     required: false
     default: next
   #
   release-tag:
-    description: The tag name to associate with a major, minor, or patch release of the package in addition to the package version number.
+    description: >
+      The tag name to associate with a major, minor, or patch release of the
+      package in addition to the package version number.
     required: false
     default: latest
 

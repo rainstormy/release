@@ -2,7 +2,7 @@
 #
 # It can be triggered manually on any branch via the GitHub CLI:
 #
-#   gh workflow run release.yml --field version=<major>.<minor>.<patch>[-prerelease][+buildinfo] --ref <branch-name>
+#   gh workflow run release.yml --field version=<major.minor.patch[-prerelease][+buildinfo]> --ref <branch-name>
 #   gh run watch
 #
 # It can be triggered manually via the GitHub web interface:
@@ -44,18 +44,17 @@ jobs:
     permissions: { }
     steps:
       - name: Check out the repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           # Use a separate access token with permission to commit and push.
           token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
         #
-        # TODO: Updraft does not yet support Markdown changelogs.
-        #
-        # - name: Update release artifacts
-        #   if: ${{ !contains(inputs.version, '-') && !contains(inputs.version, '+') }}
-        #   run: pnpm updraft --files CHANGELOG.md --release-version $VERSION
-        #   env:
-        #     VERSION: ${{ inputs.version }}
+      - name: Update release artifacts
+        uses: rainstormy-actions/updraft@main # This is a prerelease version.
+        with:
+          check-sequential-release: true
+          release-files: CHANGELOG.md
+          release-version: ${{ inputs.version }}
         #
       - name: Use Nimbus (Bot) in Git
         uses: rainstormy-actions/rainstorm-release/bot-nimbus@9317ddb0235eac4f442e89565d0b5dec80135842

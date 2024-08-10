@@ -1,10 +1,14 @@
 name: Release / Tag
-description: Creates and pushes a full semantic version tag in Git from the commit that triggered the workflow.
+description: >
+  Creates and pushes a full semantic version tag in Git from the commit
+  that triggered the workflow.
 author: Steffen Diswal
 
 inputs:
   version:
-    description: A string that contains a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+    description: >
+      A string that contains a semantic version number on the
+      form `<major.minor.patch[-prerelease][+buildinfo]>`.
     required: true
 
 runs:
@@ -16,7 +20,7 @@ runs:
         REMOTE=$(git remote | head -n 1)
 
         if [[ -z "$VERSION" ]]; then
-          echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
+          echo 'Input parameter `version` must contain a semantic version number on the form `<major.minor.patch[-prerelease][+buildinfo]>`.'
           exit 2
         fi
 

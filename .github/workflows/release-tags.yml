@@ -5,7 +5,7 @@
 #
 # It can be triggered manually on any branch via the GitHub CLI:
 #
-#   gh workflow run release-tags.yml --field version=<major>.<minor>.<patch>[-prerelease][+buildinfo] --ref <branch-name>
+#   gh workflow run release-tags.yml --field version=<major.minor.patch[-prerelease][+buildinfo]> --ref <branch-name>
 #   gh run watch
 #
 # It can be triggered manually via the GitHub web interface:
@@ -38,6 +38,7 @@ concurrency:
 jobs:
   quality-assurance:
     name: Quality assurance
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     permissions:
       contents: read # Allow the job to call the reusable `ci.yml` workflow.
       pull-requests: read # `ci.yml` requires `pull-requests` read permissions.
@@ -45,13 +46,14 @@ jobs:
 
   tags:
     name: Tags
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     needs: quality-assurance
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions: { }
     steps:
       - name: Check out the repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           # Use a separate access token to allow the push tag event in this workflow to trigger the subsequent `release-github.yml` workflow.
           # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow

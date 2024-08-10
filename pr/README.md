@@ -30,7 +30,7 @@ on:
 
 jobs:
   pull-request:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions: { }
     steps:
@@ -61,4 +61,4 @@ create a pull request.
 
 ### `version`
 A string that contains a semantic version number on the
-form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+form `<major.minor.patch[-prerelease][+buildinfo]>`.

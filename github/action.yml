@@ -1,14 +1,26 @@
 name: Release / GitHub
-description: Creates a draft GitHub release from a full semantic version tag.
+description: >
+  Creates a draft GitHub release from a full semantic version tag.
 author: Steffen Diswal
 
 inputs:
+  changelog-path:
+    description: >
+      The location of a Markdown changelog file that contains the release notes
+      in Keep a Changelog format.
+    required: false
+    default: ./CHANGELOG.md
+  #
   gh-auth-token:
-    description: An access token for GitHub with scopes for `repo` and `read:org` in order to create a GitHub release.
+    description: >
+      An access token for GitHub with scopes for `repo` and `read:org` in order
+      to create a GitHub release.
     required: true
   #
   version:
-    description: A string that contains a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+    description: >
+      A string that contains a semantic version number on the
+      form `<major.minor.patch[-prerelease][+buildinfo]>`.
     required: true
 
 runs:
@@ -22,13 +34,20 @@ runs:
           echo 'Input parameter `gh-auth-token` must be defined.'
           exit 2
         elif [[ -z "$VERSION" ]]; then
-          echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
+          echo 'Input parameter `version` must contain a semantic version number on the form `<major.minor.patch[-prerelease][+buildinfo]>`.'
           exit 2
         fi
 
+        if [ -f "$CHANGELOG_PATH" ]; then
+          RELEASE_NOTES=$(sed -n "/## \[$VERSION\]/,/^## \[/p;/^\[unreleased\]:/q" "$CHANGELOG_PATH" | sed '1d;$d')
+        else
+          RELEASE_NOTES='This release was created automatically by GitHub Actions.'
+        fi
+
         gh auth login --with-token <<< "$GH_AUTH_TOKEN"
-        gh release create --draft --verify-tag --title "$VERSION" --notes 'This release was created automatically by GitHub Actions.' "v$VERSION"
+        gh release create --draft --verify-tag --title "$VERSION" --notes "$RELEASE_NOTES" "v$VERSION"
       env:
+        CHANGELOG_PATH: ${{ inputs.changelog-path }}
         GH_AUTH_TOKEN: ${{ inputs.gh-auth-token }}
         RAW_VERSION: ${{ inputs.version }}
       shell: bash

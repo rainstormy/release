@@ -1,14 +1,20 @@
 name: Release / Pull request
-description: Commits all modified files to a new release branch and creates a pull request towards the default branch (e.g. `main`).
+description: >
+  Commits all modified files to a new release branch and creates a pull request
+  towards the default branch (e.g. `main`).
 author: Steffen Diswal
 
 inputs:
   gh-auth-token:
-    description: An access token for GitHub with scopes for `repo` and `read:org` in order to create a pull request.
+    description: >
+      An access token for GitHub with scopes for `repo` and `read:org` in order
+      to create a pull request.
     required: true
   #
   version:
-    description: A string that contains a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+    description: >
+      A string that contains a semantic version number on the
+      form `<major.minor.patch[-prerelease][+buildinfo]>`.
     required: true
 
 # https://github.com/cli/cli/issues/5896#issuecomment-1780072370
@@ -24,7 +30,7 @@ runs:
           echo 'Input parameter `gh-auth-token` must be defined.'
           exit 2
         elif [[ -z "$VERSION" ]]; then
-          echo 'Input parameter `version` must contain a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.'
+          echo 'Input parameter `version` must contain a semantic version number on the form `<major.minor.patch[-prerelease][+buildinfo]>`.'
           exit 2
         fi
 

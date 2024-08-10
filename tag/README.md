@@ -6,7 +6,7 @@ pull request created by the [`rainstormy-actions/release/pr`](../pr/README.md)
 action.
 
 The naming convention for the tag
-is `v<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+is `v<major.minor.patch[-prerelease][+buildinfo]>`.
 
 It is complemented by
 the [`rainstormy-actions/release/major-tag`](../major-tag/README.md) action,
@@ -32,9 +32,9 @@ on:
       - closed
 
 jobs:
-  tag:
+  tags:
     if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     permissions: { }
     steps:
@@ -57,4 +57,4 @@ jobs:
 ## Options
 ### `version`
 A string that contains a semantic version number on the
-form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+form `<major.minor.patch[-prerelease][+buildinfo]>`.
