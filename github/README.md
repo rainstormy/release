@@ -31,11 +31,16 @@ jobs:
       - name: Create a draft GitHub release
         uses: rainstormy-actions/release/github@v1
         with:
+          # changelog-path: ./CHANGELOG.md
           gh-auth-token: ${{ secrets.GH_AUTH_TOKEN }}
           version: ${{ github.ref_name }}
 ```
 
 ## Options
+### `changelog-path`
+The location of a Markdown changelog file that contains the release notes in
+Keep a Changelog format.
+
 ### `gh-auth-token`
 An access token for GitHub with scopes for `repo` and `read:org` in order to
 create a GitHub release.
