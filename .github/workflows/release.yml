@@ -49,13 +49,12 @@ jobs:
           # Use a separate access token with permission to commit and push.
           token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
         #
-        # TODO: Updraft does not yet support Markdown changelogs.
-        #
-        # - name: Update release artifacts
-        #   if: ${{ !contains(inputs.version, '-') && !contains(inputs.version, '+') }}
-        #   run: pnpm updraft --files CHANGELOG.md --release-version $VERSION
-        #   env:
-        #     VERSION: ${{ inputs.version }}
+      - name: Update release artifacts
+        uses: rainstormy-actions/updraft@main # This is a prerelease version.
+        with:
+          check-sequential-release: true
+          release-files: CHANGELOG.md
+          release-version: ${{ inputs.version }}
         #
       - name: Use Nimbus (Bot) in Git
         uses: rainstormy-actions/rainstorm-release/bot-nimbus@9317ddb0235eac4f442e89565d0b5dec80135842
