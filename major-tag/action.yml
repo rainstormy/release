@@ -27,7 +27,7 @@ runs:
         MAJOR_VERSION=$(echo "$VERSION" | cut -d '.' -f 1)
 
         git tag --force --annotate --message "Release $VERSION" "v$MAJOR_VERSION"
-        git push "$REMOTE" "v$MAJOR_VERSION" --force-with-lease
+        git push "$REMOTE" "v$MAJOR_VERSION" --force
       env:
         RAW_VERSION: ${{ inputs.version }}
       shell: bash
