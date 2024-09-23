@@ -9,7 +9,7 @@
 #   gh run watch
 #
 # It can be triggered manually via the GitHub web interface:
-#   https://github.com/rainstormy-actions/release/actions/workflows/release-tags.yml
+#   https://github.com/rainstormy/release/actions/workflows/release-tags.yml
 
 name: Release / Tags
 
@@ -67,11 +67,11 @@ jobs:
           ssh-key-fingerprints-github: ${{ secrets.SSH_KEY_FINGERPRINTS_GITHUB }}
         #
       - name: Create a full semantic version tag in Git
-        uses: rainstormy-actions/release/tag@main # This is a first-party action.
+        uses: rainstormy/release/tag@main # This is a first-party action.
         with:
           version: ${{ inputs.version || github.head_ref }}
         #
       - name: Create a major-only version tag in Git
-        uses: rainstormy-actions/release/major-tag@main # This is a first-party action.
+        uses: rainstormy/release/major-tag@main # This is a first-party action.
         with:
           version: ${{ inputs.version || github.head_ref }}

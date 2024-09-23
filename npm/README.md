@@ -1,9 +1,8 @@
-# `rainstormy-actions/release/npm`
+# `rainstormy/release/npm`
 
-Use the `rainstormy-actions/release/npm` action to publish a package to an npm
-registry from a particular point in the Git history, e.g. the full semantic
-version tag created by the [`rainstormy-actions/release/tag`](../tag/README.md)
-action.
+Use the `rainstormy/release/npm` action to publish a package to an npm registry
+from a particular point in the Git history, e.g. the full semantic version tag
+created by the [`rainstormy/release/tag`](../tag/README.md) action.
 
 It supports npm 10, pnpm 9, and Yarn 4 and detects the package manager
 automatically from the package lockfile in the Git repository or from
@@ -44,7 +43,7 @@ jobs:
       #   run: npm run build
       #
       - name: Publish a package to npm
-        uses: rainstormy-actions/release/npm@v1
+        uses: rainstormy/release/npm@v1
         with:
           access-level: public
           npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}

@@ -9,7 +9,7 @@
 #   gh run watch
 #
 # It can be triggered manually via the GitHub web interface:
-#   https://github.com/rainstormy-actions/release/actions/workflows/release-github.yml
+#   https://github.com/rainstormy/release/actions/workflows/release-github.yml
 
 name: Release / GitHub
 
@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         #
       - name: Create a draft GitHub release
-        uses: rainstormy-actions/release/github@main # This is a first-party action.
+        uses: rainstormy/release/github@main # This is a first-party action.
         with:
           gh-auth-token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
           version: ${{ github.ref_name }}
