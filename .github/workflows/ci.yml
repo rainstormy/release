@@ -9,7 +9,7 @@
 #   gh run watch
 #
 # It can be triggered manually on any branch via the GitHub web interface:
-#   https://github.com/rainstormy-actions/release/actions/workflows/ci.yml
+#   https://github.com/rainstormy/release/actions/workflows/ci.yml
 
 name: CI
 

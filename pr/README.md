@@ -1,6 +1,6 @@
-# `rainstormy-actions/release/pr`
+# `rainstormy/release/pr`
 
-Use the `rainstormy-actions/release/pr` action to create a release branch and a
+Use the `rainstormy/release/pr` action to create a release branch and a
 corresponding pull request in GitHub that updates release artifacts, package
 definitions, changelogs etc. to the given semantic version number.
 
@@ -48,7 +48,7 @@ jobs:
       #     VERSION: ${{ inputs.version }}
       #
       - name: Create a release-triggering pull request in GitHub
-        uses: rainstormy-actions/release/pr@v1
+        uses: rainstormy/release/pr@v1
         with:
           gh-auth-token: ${{ secrets.GH_AUTH_TOKEN }}
           version: ${{ inputs.version }}

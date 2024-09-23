@@ -1,14 +1,13 @@
-# `rainstormy-actions/release/major-tag`
+# `rainstormy/release/major-tag`
 
-Use the `rainstormy-actions/release/major-tag` action to create a major-only
-version tag in Git that points to a release commit, e.g. the merge commit of the
-pull request created by the [`rainstormy-actions/release/pr`](../pr/README.md)
-action.
+Use the `rainstormy/release/major-tag` action to create a major-only version tag
+in Git that points to a release commit, e.g. the merge commit of the pull
+request created by the [`rainstormy/release/pr`](../pr/README.md) action.
 
 The naming convention for the tag is `v<major>`.
 
-It is complemented by the [`rainstormy-actions/release/tag`](../tag/README.md)
-action, which creates a corresponding full semantic version tag in Git.
+It is complemented by the [`rainstormy/release/tag`](../tag/README.md) action,
+which creates a corresponding full semantic version tag in Git.
 
 > [!IMPORTANT]  
 > As the action creates and pushes a Git tag, it requires a separate access
@@ -45,11 +44,11 @@ jobs:
           # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
           token: ${{ secrets.GH_AUTH_TOKEN }}
       # - name: Create a full semantic version tag in Git
-      #   uses: rainstormy-actions/release/tag@v1
+      #   uses: rainstormy/release/tag@v1
       #   with:
       #     version: ${{ github.head_ref }}
       - name: Create a major-only version tag in Git
-        uses: rainstormy-actions/release/major-tag@v1
+        uses: rainstormy/release/major-tag@v1
         with:
           version: ${{ github.head_ref }}
 ```

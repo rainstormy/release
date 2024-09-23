@@ -1,8 +1,8 @@
-## `rainstormy-actions/release/github`
+## `rainstormy/release/github`
 
-Use the `rainstormy-actions/release/github` action to create a draft GitHub
-release that points to a full semantic version tag in Git, e.g. the one created
-by the [`rainstormy-actions/release/tag`](../tag/README.md) action.
+Use the `rainstormy/release/github` action to create a draft GitHub release that
+points to a full semantic version tag in Git, e.g. the one created by
+the [`rainstormy/release/tag`](../tag/README.md) action.
 
 The expected naming convention for the tag
 is `v<major.minor.patch[-prerelease][+buildinfo]>`.
@@ -29,7 +29,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
       - name: Create a draft GitHub release
-        uses: rainstormy-actions/release/github@v1
+        uses: rainstormy/release/github@v1
         with:
           # changelog-path: ./CHANGELOG.md
           gh-auth-token: ${{ secrets.GH_AUTH_TOKEN }}

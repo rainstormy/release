@@ -6,7 +6,7 @@
 #   gh run watch
 #
 # It can be triggered manually via the GitHub web interface:
-#   https://github.com/rainstormy-actions/release/actions/workflows/release.yml
+#   https://github.com/rainstormy/release/actions/workflows/release.yml
 
 name: Release
 
@@ -64,7 +64,7 @@ jobs:
           ssh-key-fingerprints-github: ${{ secrets.SSH_KEY_FINGERPRINTS_GITHUB }}
         #
       - name: Create a release-triggering pull request in GitHub
-        uses: rainstormy-actions/release/pr@main # This is a first-party action.
+        uses: rainstormy/release/pr@main # This is a first-party action.
         with:
           gh-auth-token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
           version: ${{ inputs.version }}
