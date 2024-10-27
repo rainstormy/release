@@ -42,13 +42,25 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         #
+      - name: Skip if already verified
+        id: skip-if-already-verified
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          # If an exact cache hit occurs, another workflow run on this branch has already verified that the source code is clean in the current configuration, and we can skip the rest of the job.
+          # This is especially useful upon rebasing interactively.
+          key: has-clean-code-${{ runner.os }}-sha256:${{ hashFiles('**/action.yml') }}
+          path: node_modules/.cache/shellcheck/
+        #
       - name: Verify that the action shell scripts are clean
+        if: (steps.skip-if-already-verified.outputs.cache-hit != 'true' || github.run_attempt > 1) && !cancelled()
         # language=sh
         run: |
           for ACTION in github major-tag npm pr tag; do
             echo "Checking $ACTION/action.yml"
             yq '.runs.steps.0.run' "$ACTION/action.yml" | shellcheck --shell bash --severity warning -
           done
+          mkdir --parents node_modules/.cache/shellcheck/
+          touch node_modules/.cache/shellcheck/.clean
 
   has-standardised-commit-messages:
     name: Has standardised commit messages
