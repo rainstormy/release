@@ -39,7 +39,10 @@ runs:
         fi
 
         if [ -f "$CHANGELOG_PATH" ]; then
-          RELEASE_NOTES=$(sed -n "/## \[$VERSION\]/,/^## \[/p;/^\[unreleased\]:/q" "$CHANGELOG_PATH" | sed '1d;$d')
+          # Extract the lines between the '## [$VERSION]' heading and the following '## [' heading, excluding the headings, covering the changes in the latest release.
+          # Change '###' headings to '##' headings to make them more prominent in the release notes.
+          # Replace newlines with spaces to undo the line wrapping and indentation in each list item (i.e. lines beginning with '- '), taking nested list items into account.
+          RELEASE_NOTES=$(sed -n "/## \[$VERSION\]/,/^## \[/p;/^\[unreleased\]:/q" "$CHANGELOG_PATH" | sed '1d;$d' | awk '{if(/^[ \t]*$/){if(prev){print prev;prev=""};print "";next} if(/^### /){sub(/^### /,"## ")} if($0 ~ /^## /){if(prev) print prev; prev=$0; next} trimmed=$0; gsub(/^[ \t]+/,"",trimmed); if(trimmed ~ /^-/){if(prev) print prev; prev=$0} else {sub(/^[ \t]+/,""); prev=prev" "$0}} END{if(prev) print prev}')  
         else
           RELEASE_NOTES='This release was created automatically by GitHub Actions.'
         fi

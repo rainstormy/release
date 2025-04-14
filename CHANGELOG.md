@@ -7,6 +7,10 @@ and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Reformat extracted release notes in `rainstormy/release/github`:
+  - Promote level 3 headings (`###`) to level 2 (`##`).
+  - Undo line wrapping and indents in list items.
 
 ## [1.1.0] - 2024-08-11
 ### Added
