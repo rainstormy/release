@@ -4,6 +4,9 @@ Use the `rainstormy/release/github` action to create a draft GitHub release that
 points to a full semantic version tag in Git, e.g. the one created by
 the [`rainstormy/release/tag`](../tag/README.md) action.
 
+It may extract release notes from a Markdown changelog file
+in [Keep a Changelog](https://keepachangelog.com/en/1.1.0) format.
+
 The expected naming convention for the tag
 is `v<major.minor.patch[-prerelease][+buildinfo]>`.
 
@@ -38,8 +41,8 @@ jobs:
 
 ## Options
 ### `changelog-path`
-The location of a Markdown changelog file that contains the release notes in
-Keep a Changelog format.
+The location of a Markdown changelog file that contains the release notes
+in [Keep a Changelog](https://keepachangelog.com/en/1.1.0) format.
 
 ### `gh-auth-token`
 An access token for GitHub with scopes for `repo` and `read:org` in order to
