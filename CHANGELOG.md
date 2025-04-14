@@ -7,6 +7,8 @@ and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.1] - 2025-04-14
 ### Changed
 - Reformat extracted release notes in `rainstormy/release/github`:
   - Promote level 3 headings (`###`) to level 2 (`##`).
@@ -27,6 +29,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - New action: `rainstormy/release/github`.
 - New action: `rainstormy/release/npm`.
 
-[unreleased]: https://github.com/rainstormy/release/releases/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/rainstormy/release/releases/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/rainstormy/release/releases/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/rainstormy/release/releases/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rainstormy/release/releases/tag/v1.0.0
