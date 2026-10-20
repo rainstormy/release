@@ -34,7 +34,7 @@ concurrency:
 jobs:
   has-clean-code:
     name: Has clean code
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     permissions:
       contents: read # Allow the job to check out the repository.
@@ -65,7 +65,7 @@ jobs:
   has-standardised-commit-messages:
     name: Has standardised commit messages
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == false
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 1
     permissions:
       pull-requests: read # Allow the job to read the commit messages in the pull request.
